@@ -1,0 +1,207 @@
+<div id="fire-survey">
+    <style>
+        .animated {
+            transition: all 500ms ease-in-out;
+        }
+
+        .screen {
+            height: 0;
+            opacity: 0;
+            overflow: hidden;
+            max-width: 600px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .screen-visible {
+            height: auto;
+            opacity: 1;
+            overflow: initial;
+        }
+
+        .screen h2 {
+            font-size: xx-large;
+            text-transform: uppercase;
+        }
+
+        .screen p {
+            text-align: justify;
+        }
+    </style>
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            Rule of 72
+        </h2>
+
+        <p class="centered one">
+            The <b>rule of 72</b> is a popular formula used to roughly estimate how long it will
+            take for your investments to double in time assuming a constant rate of return.
+        </p>
+
+        <p class="centered one">
+            The formula is extremely simple! Just take the number 72 and divide it by the interest
+            rate that you hope to earn from your investments.
+        </p>
+
+        <p class="centered flex one">
+            We'll now ask you a few questions about your personal finances to show you that, even
+            with modest initial savings, you can accumulate a significant amount of wealth.
+        </p>
+
+    </div>
+
+    <div class="screen animated">
+
+        <div>
+            <h2 class="centered">
+                How much can you start with?
+            </h2>
+        </div>
+
+        <div class="centered flex one">
+            <label for="investments-net">
+                Total Invested Amount
+            </label>
+            <input type="number" pattern="/d*" id="investments-net" min="5000" value="5000" />
+            <span class="centered" style="font-size: small;">
+                Total money invested in stock market, 401K, etc.
+            </span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="centered flex one">
+            <label for="expected-return">
+                Expected Investment Annual Return Rate
+            </label>
+            <input type="number" pattern="/d*" id="expected-return" min="0" max="100" value="9.2" />
+            <span class="centered" style="font-size: small;">
+                The average stock market return for a 10-year period is 9.2% per year.
+            </span>
+        </div>
+    </div>
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            Doubling Time
+        </h2>
+
+        <p class="centered one">
+            With the expected annual return rate, the <b>rule of 72</b> lets you estimate that your
+            investments will double every <b><span id="doubling-years"></span> years</b>.
+        </p>
+
+        <p class="centered one">
+            Now let's watch what happens when we take advantage of compounding interest...
+        </p>
+
+    </div>
+
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            In <span class="years animated"></span> Years, You'll Have
+        </h2>
+
+        <h2 class="centered animated" id="current-wealth" style="font-size: 64px;"></h2>
+
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+
+    <div class="screen animated" id="nav">
+        <div class="centered flex one">
+            <button id="next">NEXT</button>
+            <button onclick="window.location.reload()">START OVER</button>
+        </div>
+    </div>
+
+    <script async>
+        (async function () {
+            const rootElement = document.currentScript.parentElement;
+
+            const nextButton = rootElement.querySelector('#next');
+            const investmentsElem = rootElement.querySelector('#investments-net');
+            const interestRateElem = rootElement.querySelector('#expected-return');
+            const doublingElem = rootElement.querySelector('#doubling-years');
+            const wealthElem = rootElement.querySelector('#current-wealth');
+
+            function updateYears() {
+                [].forEach.call(rootElement.querySelectorAll('.years'), elem => {
+                    elem.style.opacity = 0;
+                    setTimeout(() => {
+                        elem.innerText = Formatter.years(currentYears);
+                        elem.style.opacity = 1;
+                    }, 300);
+                });
+                wealthElem.style.opacity = 0;
+                setTimeout(() => {
+                    wealthElem.innerText = Formatter.price(currentWealth);
+                    wealthElem.style.opacity = 1;
+                }, 300);
+            }
+
+            function doubleWealth() {
+                currentYears += doublingTime;
+                currentWealth *= 2;
+                updateYears();
+            }
+
+            let doublingTime = 72 / parseFloat(interestRateElem.value);
+            doublingElem.innerText = Formatter.years(doublingTime);
+
+            // We start with one doubling
+            let currentWealth = parseInt(investmentsElem.value) * 2;
+            let currentYears = doublingTime;
+            updateYears();
+
+
+            let screenIdx = 0;
+            const screens = [].slice.call(rootElement.querySelectorAll('div.screen'), 0, -1);
+            rootElement.querySelector('#next').addEventListener('click', event => {
+                updateYears();
+                const currScreen = screens[screenIdx];
+
+                if (screenIdx + 1 < screens.length) {
+                    const nextScreen = screens[screenIdx + 1];
+                    currScreen.classList.remove('screen-visible');
+                    nextScreen.classList.add('screen-visible');
+                    screenIdx++;
+
+                } else if (currentWealth < 1E6) {
+                    doubleWealth();
+                    if (currentWealth > 1E6) {
+                        nextButton.setAttribute('disabled', 'true');
+                    }
+                }
+            });
+
+            rootElement.querySelector('div.screen:first-of-type').classList.add('screen-visible');
+            rootElement.querySelector('#nav').classList.add('screen-visible');
+
+            // Toggle enable/disable of next button depending on parameters
+            investmentsElem.addEventListener('change', function () {
+                if (parseInt(this.value) < 5000) nextButton.setAttribute('disabled', 'true');
+                else nextButton.removeAttribute('disabled');
+                // Update the current wealth value here too
+                currentWealth = parseInt(this.value);
+            });
+            interestRateElem.addEventListener('change', function () {
+                if (parseFloat(this.value) < 0) nextButton.setAttribute('disabled', 'true');
+                else nextButton.removeAttribute('disabled');
+                // Update the doubling time alongside this value
+                doublingTime = 72 / parseFloat(this.value);
+                doublingElem.innerText = Formatter.years(doublingTime);
+                // Update the initial doubling time
+                currentYears = doublingTime;
+                updateYears();
+            });
+        })();
+    </script>
+</div>
