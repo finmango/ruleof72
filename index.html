@@ -1,0 +1,159 @@
+<!DOCTYPE html><html><!-- HTML page head --><head>
+    <!-- HTML metadata -->
+    <meta charset="UTF-8">
+    <title>FinMango Rule of 72</title>
+    <meta name="description" content="Rule of 72 simulator, made by FinMango">
+    <link rel="icon" type="image/ico" href="./static/favicon.ico">
+
+    <!-- Add to homescreen for Safari on iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FinMango Rule of 72">
+
+    <!-- Homescreen icons -->
+    <link rel="apple-touch-icon" href="./static/favicon.ico">
+
+    <!-- Capabilities-related metadata -->
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <!-- Google Charts -->
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <!-- MomentJS -->
+    <script type="text/javascript" src="./third_party/moment/min/moment.min.js"></script>
+
+    <!-- Custom styles and fonts -->
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/goldman-sans">
+    <link rel="stylesheet" href="./third_party/picnic/picnic.min.css">
+    <link rel="stylesheet" href="./static/styles.min.css">
+
+    <!-- Polyfills, custom functions and constants -->
+    <script type="text/javascript" src="./static/cache.min.js"></script>
+    <script type="text/javascript" src="./static/formatter.min.js"></script>
+    <script type="text/javascript" src="./static/component-helper.min.js"></script>
+    <script type="text/javascript" src="./static/polyfills.min.js"></script>
+    <script type="text/javascript">const DEFAULT_OPTIONS={};CURRENT_OPTIONS=Object.keys(DEFAULT_OPTIONS).reduce((t,e)=>Object.assign(t,{[e]:sessionStorage.getItem(e)||DEFAULT_OPTIONS[e]}),{}),GOOGLE_CHARTS_CONFIG=window.GOOGLE_CHARTS_CONFIG||{theme:"material",fontName:"Goldman Sans",colors:["{{theme-primary}}"],legend:{position:CURRENT_OPTIONS.chart_legend_position||"none"},chartArea:{width:"100%",height:"100%",left:parseInt(CURRENT_OPTIONS.chart_padding_left||64),bottom:parseInt(CURRENT_OPTIONS.chart_padding_bottom||48),top:parseInt(CURRENT_OPTIONS.chart_padding_top||24)},titlePosition:"in",axisTitlesPosition:"in",hAxis:{textPosition:"bottom",textStyle:{fontName:"Goldman Sans"}},vAxis:{textPosition:"out",viewWindow:{min:0},textStyle:{fontName:"Goldman Sans"}},height:parseInt(CURRENT_OPTIONS.chart_height||300)};</script>
+
+
+
+</head><body>
+    <!-- Page header -->
+    <header class="flex center one">
+    <div>
+        <a class="centered uppercase" target="_blank" href="https://finmango.org" style="display: block; padding: 0;">
+            <img class="centered" src="./static/logo.png" height="128" width="auto">
+        </a>
+    </div>
+</header>
+
+    <main class="single-column-wide" style="margin-top: auto; margin-bottom: auto;">
+
+        <div id="fire-survey">
+    <style>.animated{transition:all .5s ease-in-out}.screen{height:0;opacity:0;overflow:hidden;max-width:600px;display:block;margin-left:auto;margin-right:auto}.screen-visible{height:auto;opacity:1;overflow:initial}.screen h2{font-size:xx-large;text-transform:uppercase}.screen p{text-align:justify}</style>
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            Rule of 72
+        </h2>
+
+        <p class="centered one">
+            The <b>rule of 72</b> is a popular formula used to roughly estimate how long it will
+            take for your investments to double in time assuming a constant rate of return.
+        </p>
+
+        <p class="centered one">
+            The formula is extremely simple! Just take the number 72 and divide it by the interest
+            rate that you hope to earn from your investments.
+        </p>
+
+        <p class="centered flex one">
+            We'll now ask you a few questions about your personal finances to show you that, even
+            with modest initial savings, you can accumulate a significant amount of wealth.
+        </p>
+
+    </div>
+
+    <div class="screen animated">
+
+        <div>
+            <h2 class="centered">
+                How much can you start with?
+            </h2>
+        </div>
+
+        <div class="centered flex one">
+            <label for="investments-net">
+                Total Invested Amount
+            </label>
+            <input type="number" pattern="/d*" id="investments-net" min="5000" value="5000">
+            <span class="centered" style="font-size: small;">
+                Total money invested in stock market, 401K, etc.
+            </span>
+        </div>
+
+        <div class="spacer"></div>
+
+        <div class="centered flex one">
+            <label for="expected-return">
+                Expected Investment Annual Return Rate
+            </label>
+            <input type="number" pattern="/d*" id="expected-return" min="0" max="100" value="9.2">
+            <span class="centered" style="font-size: small;">
+                The average stock market return for a 10-year period is 9.2% per year.
+            </span>
+        </div>
+    </div>
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            Doubling Time
+        </h2>
+
+        <p class="centered one">
+            With the expected annual return rate, the <b>rule of 72</b> lets you estimate that your
+            investments will double every <b><span id="doubling-years"></span> years</b>.
+        </p>
+
+        <p class="centered one">
+            Now let's watch what happens when we take advantage of compounding interest...
+        </p>
+
+    </div>
+
+
+    <div class="screen animated">
+
+        <h2 class="centered">
+            In <span class="years animated"></span> Years, You'll Have
+        </h2>
+
+        <h2 class="centered animated" id="current-wealth" style="font-size: 64px;"></h2>
+
+    </div>
+
+    <div class="spacer"></div>
+    <div class="spacer"></div>
+
+    <div class="screen animated" id="nav">
+        <div class="centered flex one">
+            <button id="next">NEXT</button>
+            <button onclick="window.location.reload()">START OVER</button>
+        </div>
+    </div>
+
+    <script async>!async function(){const e=document.currentScript.parentElement,t=e.querySelector("#next"),r=e.querySelector("#investments-net"),s=e.querySelector("#expected-return"),l=e.querySelector("#doubling-years"),i=e.querySelector("#current-wealth");function a(){[].forEach.call(e.querySelectorAll(".years"),e=>{e.style.opacity=0,setTimeout(()=>{e.innerText=Formatter.years(o),e.style.opacity=1},300)}),i.style.opacity=0,setTimeout(()=>{i.innerText=Formatter.price(c),i.style.opacity=1},300)}let n=72/parseFloat(s.value);l.innerText=Formatter.years(n);let c=2*parseInt(r.value),o=n;a();let u=0;const d=[].slice.call(e.querySelectorAll("div.screen"),0,-1);e.querySelector("#next").addEventListener("click",e=>{a();const r=d[u];if(u+1<d.length){const e=d[u+1];r.classList.remove("screen-visible"),e.classList.add("screen-visible"),u++}else c<1e6&&(o+=n,c*=2,a(),c>1e6&&t.setAttribute("disabled","true"))}),e.querySelector("div.screen:first-of-type").classList.add("screen-visible"),e.querySelector("#nav").classList.add("screen-visible"),r.addEventListener("change",function(){parseInt(this.value)<5e3?t.setAttribute("disabled","true"):t.removeAttribute("disabled"),c=parseInt(this.value)}),s.addEventListener("change",function(){parseFloat(this.value)<0?t.setAttribute("disabled","true"):t.removeAttribute("disabled"),n=72/parseFloat(this.value),l.innerText=Formatter.years(n),o=n,a()})}();</script>
+</div>
+
+        <!-- Add some whitespace to the bottom -->
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+    </main>
+
+    <!-- Load analytics at the end of the page -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1ESQM2JVD5"></script>
+<script>function gtag(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],gtag("js",new Date),gtag("config","G-1ESQM2JVD5");</script>
+
+
+</body></html>
